@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Pile up -Art clock-</title>
+<style type="text/css">
+/* canvasの背景を設定 */
+#canvas-container canvas{
+	background: url(./phone.gif) no-repeat !important;
+	//background-position: center center !important;
+}
+</style>
+<script type="text/javascript" src="matter-0.8.0.min.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+//物理演算
+var Engine = Matter.Engine,
+Gui = Matter.Gui,
+World = Matter.World,
+Body = Matter.Body,
+Bodies = Matter.Bodies,
+Constraint = Matter.Constraint,
+Composites = Matter.Conposites,
+Common = Matter.Common,
+Vertices = Matter.Vertices,
+MouseConstraint = Matter.MouseConstraint;
+
+var container;
+var options;
+var engine;
+var world;
+var renderOptions;
+
+var dates,hour,min,sec;
+var ihour, imin, isec;
+
+//ロードした際のボールの初期設定
+var hourBall = [];
+var minBall = [];
+var secBall = [];
+
+function Start() {
+	container = document.getElementById('canvas-container');
+
+	//描画域を作成(描画したいDOM,オプションを読み込む)
+	engine = Engine.create(container, options);
+	world = engine.world;
+	
+	renderOptions = engine.render.options;
+	renderOptions.wireframes = false;
+
+	//矩形で枠線を作る(rectangle(x座標,y座標,横幅,縦幅,option))
+	World.add(world, [
+		Bodies.rectangle(195, 50, 250, 1, {isStatic: true}),//天井
+		Bodies.rectangle(320, 250, 1, 400, {isStatic: true}),//右壁
+		Bodies.rectangle(70, 250, 1, 400, {isStatic: true}),//左壁
+		Bodies.rectangle(195, 450, 250, 1, {isStatic: true})//床
+	]);
+	//+70, +50
+	
+	//mouse操作
+	var mouseConstraint = MouseConstraint.create(engine);
+	World.add(engine.world, mouseConstraint);
+	
+	/*
+	hour=23;
+	min=59;
+	sec=59;
+	*/
+
+	dates=new Date();
+	hour=dates.getHours();
+	min=dates.getMinutes();
+	sec=dates.getSeconds();
+
+	for(ihour=1;ihour<=hour;ihour++){ hourCircle(); }
+	for(imin=1;imin<=min;imin++){ minCircle(); }
+	for(isec=1;isec<=sec;isec++){ secCircle(); }
+
+	setInterval("clock()",100);
+
+	//実行
+	Engine.run(engine);
+
+
+}
+
+function clock() {
+	dates = new Date();
+	sec = dates.getSeconds();
+	min = dates.getMinutes();
+	hour = dates.getHours();
+
+	if (isec != sec) {
+		if(sec == 0){
+			World.clear(world, true);
+			for(ihour=1;ihour<=hour;ihour++){ hourCircle(); }
+			for(imin=1;imin<=min;imin++){ minCircle(); }
+		}
+		else {
+			secCircle();
+		}
+		isec = dates.getSeconds();
+	}
+	if (imin != min) {
+		if(min == 0){
+			World.clear(world, true);
+			for(ihour=1;ihour<=hour;ihour++){ hourCircle(); }
+		}
+		else {
+			//minCircle();
+		}
+		imin = dates.getMinutes();
+	}
+	if (ihour != hour) {
+		if(hour == 0){
+			World.clear(world, true);
+		}
+		else {
+			//hourCircle();
+		}
+		ihour = dates.getHours();
+	}
+}
+
+function hourCircle() {
+	hourBall[ihour] = Bodies.circle(Math.random()*240 + 80,
+	Math.random()*170 + 60, 20,{render: {fillStyle: '#e4e429'}
+	});
+	World.add(world, [hourBall[ihour]]);
+}
+function minCircle() {
+	minBall[imin] = Bodies.circle(Math.random()*240 + 80,
+	Math.random()*170 + 60, 13,{render: {fillStyle: '#75a1d8'}
+	});
+	World.add(world, [minBall[imin]]);
+}
+function secCircle() {
+	secBall[isec] = Bodies.circle(Math.random()*240 + 80,
+	Math.random()*170 + 60, 5,{render: {fillStyle: '#e394ba'}
+	});
+	World.add(world, [secBall[isec]]);
+}
+
+//-->
+</SCRIPT>
+</head>
+
+<body onload='Start()'>
+<div id="canvas-container"></div>
+
+</body>
+</html>
